@@ -32,6 +32,9 @@ public class OrderRecord {
 
     private Integer attempts;
 
+    @Column(length = 100)
+    private String receipt;
+
     @JdbcTypeCode((SqlTypes.JSON))
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> notes;

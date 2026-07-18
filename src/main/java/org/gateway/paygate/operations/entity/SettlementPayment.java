@@ -7,9 +7,9 @@ import jakarta.persistence.*;
 public class SettlementPayment {
 
     @EmbeddedId
-        private SettlementPaymentId id;
+    private SettlementPaymentId id;
 
-    @MapsId
+    @MapsId("settlementId")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "settlement_id", nullable = false)
     private Settlement settlement;

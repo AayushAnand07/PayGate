@@ -1,5 +1,6 @@
 package org.gateway.paygate.common.enums;
 
+
 public enum BusinessType {
     LLP,
     PROPRIETORSHIP,

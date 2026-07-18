@@ -1,12 +1,18 @@
 package org.gateway.paygate.merchant.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.gateway.paygate.common.enums.Environment;
 
 import java.util.UUID;
 
 @Entity
 @Table(name = "api_key")
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ApiKey {
 
     @Id
@@ -23,11 +29,15 @@ public class ApiKey {
     @Column(nullable = false,length = 200)
     private String keySecretHash;
 
+    @Column(length = 200)
+    private String previousKeySecretHash;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false,length = 10)
     private Environment environment;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean enabled = true;
 
     private java.time.LocalDateTime lastUsedAt;

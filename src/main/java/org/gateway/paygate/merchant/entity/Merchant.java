@@ -2,6 +2,7 @@ package org.gateway.paygate.merchant.entity;
 
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.gateway.paygate.common.enums.BusinessType;
 import org.gateway.paygate.common.enums.MerchantStatus;
 
@@ -9,6 +10,11 @@ import java.util.UUID;
 
 @Entity
 @Table(name="merchant")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Merchant {
 
     @Id
