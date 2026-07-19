@@ -1,0 +1,20 @@
+package org.gateway.paygate.payment.mapper;
+
+import org.gateway.paygate.payment.dto.response.PaymentResponse;
+import org.gateway.paygate.payment.entity.Payment;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+
+import java.util.List;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface PaymentMapper {
+    @Mapping(target = "orderId", source = "order.id")
+    PaymentResponse toResponse(Payment payment);
+
+    @Mapping(target = "orderId", source = "order.id")
+    List<PaymentResponse> toResponseList(List<Payment> paymentList);
+
+
+}
