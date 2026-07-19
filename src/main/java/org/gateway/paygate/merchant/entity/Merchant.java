@@ -3,6 +3,7 @@ package org.gateway.paygate.merchant.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.enums.BusinessType;
 import org.gateway.paygate.common.enums.MerchantStatus;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Merchant {
+public class Merchant extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

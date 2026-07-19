@@ -1,6 +1,7 @@
 package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
+import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.enums.PaymentEvent;
 import org.gateway.paygate.common.enums.PaymentStatus;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Table(name = "payment_transition_log",indexes = {
         @Index(name = "idx_payment_transition_log_payment_id", columnList = "payment_id"),
 })
-public class PaymentTransitionLog {
+public class PaymentTransitionLog extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

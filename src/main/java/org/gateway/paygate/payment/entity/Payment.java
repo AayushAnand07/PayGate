@@ -2,6 +2,7 @@ package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.PaymentMethod;
 import org.gateway.paygate.common.enums.PaymentStatus;
@@ -19,7 +20,7 @@ import java.util.UUID;
 })
 @Getter
 
-public class Payment {
+public class Payment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.UUID)

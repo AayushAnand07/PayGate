@@ -3,6 +3,7 @@ package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.OrderStatus;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -22,7 +23,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderRecord {
+public class OrderRecord extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

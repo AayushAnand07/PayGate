@@ -1,6 +1,7 @@
 package org.gateway.paygate.operations.entity;
 
 import jakarta.persistence.*;
+import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.SettlementStatus;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "settlement")
-public class Settlement {
+public class Settlement extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -2,6 +2,7 @@ package org.gateway.paygate.merchant.entity;
 
 
 import jakarta.persistence.*;
+import org.gateway.paygate.common.entity.BaseEntity;
 
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 @Table(name = "merchant_webhook_config" , indexes = {
         @Index(name = "idx_merchant_webhook_config_merchant_id", columnList = "merchant_id, enabled")
 })
-public class MerchantWebhookConfig {
+public class MerchantWebhookConfig extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
