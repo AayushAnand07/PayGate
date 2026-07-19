@@ -4,7 +4,7 @@ import org.gateway.paygate.common.enums.Environment;
 
 import java.util.UUID;
 
-public record createApiKeyResponse(
+public record ApiKeyCreateResponse(
         UUID id,
         String keyId,
         String keySecret,
