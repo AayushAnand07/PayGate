@@ -6,7 +6,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "customers")
+@Table(name = "customers" , indexes = {
+        @Index(name = "idx_customers_merchant_id", columnList = "merchant_id"),
+        @Index(name = "idx_customers_email", columnList = "email"),
+
+})
 public class Customers {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

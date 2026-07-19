@@ -9,7 +9,9 @@ import org.gateway.paygate.common.enums.MerchantStatus;
 import java.util.UUID;
 
 @Entity
-@Table(name="merchant")
+@Table(name="merchant" , indexes = {
+        @Index(name = "idx_merchant_merchantStatus", columnList = "merchantStatus"),
+})
 @Getter
 @Setter
 @AllArgsConstructor
