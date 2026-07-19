@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.gateway.paygate.merchant.dto.response.ApiKeyResponse;
 import org.gateway.paygate.merchant.dto.request.createApiKeyRequest;
-import org.gateway.paygate.merchant.dto.response.createApiKeyResponse;
+import org.gateway.paygate.merchant.dto.response.ApiKeyCreateResponse;
 import org.gateway.paygate.merchant.service.ApiKeyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class ApiKeyController {
     private final ApiKeyService apiKeyService;
 
     @PostMapping
-    public ResponseEntity<createApiKeyResponse> create(@PathVariable UUID merchantId, @Valid @RequestBody createApiKeyRequest request) {
+    public ResponseEntity<ApiKeyCreateResponse> create(@PathVariable UUID merchantId, @Valid @RequestBody createApiKeyRequest request) {
          return ResponseEntity.status(HttpStatus.CREATED).body(apiKeyService.create(merchantId, request));
     }
 
@@ -37,8 +37,8 @@ public class ApiKeyController {
     }
 
     @PostMapping("/{keyId}/rotate")
-    public ResponseEntity<createApiKeyResponse> rotateKey(@PathVariable UUID merchantId, @PathVariable UUID keyId) {
-        createApiKeyResponse newKeyResponse = apiKeyService.rotate(merchantId, keyId);
+    public ResponseEntity<ApiKeyCreateResponse> rotateKey(@PathVariable UUID merchantId, @PathVariable UUID keyId) {
+        ApiKeyCreateResponse newKeyResponse = apiKeyService.rotate(merchantId, keyId);
         return ResponseEntity.ok(newKeyResponse);
     }
 }
