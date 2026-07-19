@@ -2,6 +2,7 @@ package org.gateway.paygate.payment.entity;
 
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.OrderStatus;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -9,11 +10,15 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
 @Table(name = "order_record")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class OrderRecord {
 
     @Id
@@ -21,7 +26,7 @@ public class OrderRecord {
     private UUID id;
 
     @Column(name = "merchant_id", nullable = false)
-    private UUID merchant_id;
+    private UUID merchantId;
 
     @Embedded
     private Money amount;
