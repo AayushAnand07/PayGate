@@ -7,9 +7,10 @@ import org.gateway.paygate.common.exception.ResourceNotFoundException;
 import org.gateway.paygate.common.util.RandomizerUtil;
 import org.gateway.paygate.merchant.dto.request.createApiKeyRequest;
 import org.gateway.paygate.merchant.dto.response.ApiKeyResponse;
-import org.gateway.paygate.merchant.dto.response.createApiKeyResponse;
+import org.gateway.paygate.merchant.dto.response.ApiKeyCreateResponse;
 import org.gateway.paygate.merchant.entity.ApiKey;
 import org.gateway.paygate.merchant.entity.Merchant;
+import org.gateway.paygate.merchant.mapper.ApiKeyMapper;
 import org.gateway.paygate.merchant.repository.ApiKeyRepository;
 import org.gateway.paygate.merchant.repository.MerchantRepository;
 import org.gateway.paygate.merchant.service.ApiKeyService;
@@ -27,11 +28,12 @@ import java.util.UUID;
 public class ApiKeyServiceImpl implements ApiKeyService {
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
+    private final ApiKeyMapper apiKeyMapper;
 
 
     @Override
     @Transactional(readOnly = true)
-    public createApiKeyResponse create(UUID merchantId, createApiKeyRequest request) {
+    public ApiKeyCreateResponse create(UUID merchantId, createApiKeyRequest request) {
         Merchant merchant  = merchantRepository.findById(merchantId).orElseThrow(() -> new ResourceNotFoundException("Merchant", merchantId));
 
         String keyId = "paygw_"+request.environment().name().toLowerCase()+"_"+RandomizerUtil.randomBase64(24);
@@ -45,7 +47,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
         apiKey = apiKeyRepository.save(apiKey);
 
-        return new createApiKeyResponse(
+        return new ApiKeyCreateResponse(
                 apiKey.getId(),
                 keyId,
                 rawSecret,
@@ -59,14 +61,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     public List<ApiKeyResponse> listByMerchant(UUID merchantId) {
-        return apiKeyRepository.findByMerchant_Id(merchantId).stream().map(apiKey -> new ApiKeyResponse(
-                apiKey.getId(),
-                apiKey.getKeyId(),
-                apiKey.getEnvironment(),
-                apiKey.isEnabled(),
-                apiKey.getLastUsedAt(),
-                null
-        )).toList();
+        return   apiKeyMapper.toApiKeyCreateResponseList(apiKeyRepository.findByMerchant_Id(merchantId));
     }
 
     @Override
@@ -79,15 +74,19 @@ public class ApiKeyServiceImpl implements ApiKeyService {
 
     @Override
     @Transactional
-    public createApiKeyResponse rotate(UUID merchantId, UUID keyId) {
-        ApiKey apiKey = apiKeyRepository.findById(keyId).filter(k -> k.getMerchant().getId().equals(merchantId)).orElseThrow(() -> new ResourceNotFoundException("API Key", keyId));
+    public ApiKeyCreateResponse rotate(UUID merchantId, UUID keyId) {
+        ApiKey apiKey = apiKeyRepository.findById(keyId).
+                filter(k -> k.getMerchant().getId().
+                        equals(merchantId)).orElseThrow(() -> new ResourceNotFoundException("API Key", keyId));
+
+        if(!apiKey.isEnabled()) throw  new RuntimeException("Cannot rotate a disabled API key");
         String newRawSecret = RandomizerUtil.randomBase64(40);
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
         apiKey.setKeySecretHash(newRawSecret);
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24));
 //        apiKey = apiKeyRepository.save(apiKey);
-        return new createApiKeyResponse(
+        return new ApiKeyCreateResponse(
                 apiKey.getId(),
                 apiKey.getKeyId(),
                 newRawSecret,
