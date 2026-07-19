@@ -1,6 +1,7 @@
 package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.PaymentMethod;
 import org.gateway.paygate.common.enums.PaymentStatus;
@@ -13,6 +14,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "payment")
+@Getter
+
 public class Payment {
 
     @Id
