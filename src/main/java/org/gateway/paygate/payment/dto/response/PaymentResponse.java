@@ -19,12 +19,12 @@ public record PaymentResponse (
         PaymentStatus status,
         PaymentMethod method,
         Map<String, Object> methodDetails,
-        String cardLastFour,
-        String cardBrand,
-        String bankReference,
+//        String cardLastFour,
+//        String cardBrand,
+//        String bankReference,
         String errorCode,
         String errorDescription,
-        Long refundedAmountPaise,
+        //Long refundedAmountPaise,
         LocalDateTime capturedAt,
         LocalDateTime createdAt
 ){
