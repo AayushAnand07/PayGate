@@ -1,7 +1,9 @@
 package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.PaymentMethod;
@@ -19,7 +21,8 @@ import java.util.UUID;
         @Index(name = "idx_payment_merchant_id", columnList = "merchant_id")
 })
 @Getter
-
+@Setter
+@Builder
 public class Payment extends BaseEntity {
 
     @Id
@@ -52,6 +55,10 @@ public class Payment extends BaseEntity {
 
     @Column(length = 100)
     private String bankReference;
+
+
+    @Column(length = 100)
+    private String processorReference;
 
     @Column(length = 100)
     private String errorCode;
