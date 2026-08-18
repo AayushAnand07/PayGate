@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gateway.paygate.common.enums.OrderStatus;
+import org.gateway.paygate.common.enums.PaymentEvent;
 import org.gateway.paygate.common.enums.PaymentMethod;
 import org.gateway.paygate.common.enums.PaymentStatus;
 import org.gateway.paygate.common.exception.BusinessRuleViolationException;
@@ -19,6 +20,7 @@ import org.gateway.paygate.payment.mapper.PaymentMapper;
 import org.gateway.paygate.payment.repository.OrderRepository;
 import org.gateway.paygate.payment.repository.PaymentRepository;
 import org.gateway.paygate.payment.service.PaymentService;
+import org.gateway.paygate.payment.statemachine.PaymentTransitionService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -32,6 +34,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentGatewayRouter paymentGatewayRouter;
     private final PaymentMapper paymentMapper;
+    private final PaymentTransitionService paymentTransitionService;
 
     @Override
     @Transactional
@@ -67,7 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
         if(result instanceof PaymentResult.Pending pending) {
             payment.setProcessorReference(pending.registerationReference());
         }else if(result instanceof PaymentResult.Failure failure){
-            payment.setStatus(PaymentStatus.FAILED);
+            paymentTransitionService.applyTransition(payment, PaymentEvent.AUTHORIZE_FAIL);
             payment.setErrorCode(failure.errorCode());
             payment.setErrorDescription(failure.errorDescription());
         }
@@ -86,14 +89,14 @@ public class PaymentServiceImpl implements PaymentService {
                 () -> new ResourceNotFoundException("Payment not found ", paymentId)
         );
 
-        payment.setStatus(PaymentStatus.CAPTURING);
+        paymentTransitionService.applyTransition(payment, PaymentEvent.CAPTURE_REQUEST);
         PaymentResult paymentResult = paymentGatewayRouter.capture(payment.getMethod(), paymentId);
         if(paymentResult instanceof  PaymentResult.Success success){
-            payment.setStatus(PaymentStatus.CAPTURED);
+            paymentTransitionService.applyTransition(payment, PaymentEvent.CAPTURE_SUCCESS);
             payment.setCapturedAt(LocalDateTime.now());
             log.info("Payment captured successfully for paymentId: {}", paymentId);
         }else if(paymentResult instanceof PaymentResult.Failure failure){
-            payment.setStatus(PaymentStatus.AUTHORIZED);
+            paymentTransitionService.applyTransition(payment, PaymentEvent.CAPTURE_FAIL);
             payment.setErrorCode(failure.errorCode());
             payment.setErrorDescription(failure.errorDescription());
             log.warn("Failed to capture payment for paymentId: {}", paymentId);
