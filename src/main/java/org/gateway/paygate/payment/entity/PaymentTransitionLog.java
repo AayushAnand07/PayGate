@@ -1,7 +1,9 @@
 package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import org.gateway.paygate.common.entity.BaseEntity;
+import org.gateway.paygate.common.enums.PaymentActor;
 import org.gateway.paygate.common.enums.PaymentEvent;
 import org.gateway.paygate.common.enums.PaymentStatus;
 
@@ -9,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Builder
 @Table(name = "payment_transition_log",indexes = {
         @Index(name = "idx_payment_transition_log_payment_id", columnList = "payment_id"),
 })
@@ -34,8 +37,9 @@ public class PaymentTransitionLog extends BaseEntity {
     @Column(name = "to_status", nullable = false, length = 30)
     private PaymentStatus toStatus;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "actor", length = 100)
-    private String actor;
+    private PaymentActor actor;
 
     @Column(name = "occurred_at", nullable = false)
     private LocalDateTime occurredAt;
