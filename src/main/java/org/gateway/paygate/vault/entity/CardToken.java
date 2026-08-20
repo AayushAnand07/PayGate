@@ -2,6 +2,7 @@ package org.gateway.paygate.vault.entity;
 
 
 import jakarta.persistence.*;
+import lombok.*;
 import org.gateway.paygate.common.entity.BaseEntity;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,12 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "card_token")
+@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+
 public class CardToken extends BaseEntity {
 
     @Id
