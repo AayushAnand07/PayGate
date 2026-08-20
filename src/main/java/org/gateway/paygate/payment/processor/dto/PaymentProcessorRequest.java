@@ -10,13 +10,13 @@ public record PaymentProcessorRequest(
         UUID processingID,
         UUID paymentId,
         PaymentMethod method,
-         Money amount,
+        Money amount,
         String pan,
         String expiry,
         Map<String, Object> methodDetails
 ) {
-        public static PaymentProcessorRequest card(Money amount, String pan, String expiry,Map<String, Object> methodDetails){
-            return new PaymentProcessorRequest(UUID.randomUUID(), null, PaymentMethod.CARD, amount, pan, expiry, methodDetails);
+        public static PaymentProcessorRequest card(UUID paymentId, Money amount, String pan, String expiry,Map<String, Object> methodDetails){
+            return new PaymentProcessorRequest(UUID.randomUUID(), paymentId, PaymentMethod.CARD, amount, pan, expiry, methodDetails);
         }
 
 
