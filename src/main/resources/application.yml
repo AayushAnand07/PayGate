@@ -15,5 +15,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+vault:
+  master-key: ${VAULT_MASTER_KEY:}
+
 server:
   port: 8081
