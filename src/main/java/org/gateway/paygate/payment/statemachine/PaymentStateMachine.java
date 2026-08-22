@@ -3,10 +3,12 @@ package org.gateway.paygate.payment.statemachine;
 import org.gateway.paygate.common.enums.PaymentEvent;
 import org.gateway.paygate.common.enums.PaymentStatus;
 import org.gateway.paygate.common.exception.InvalidStateTransitionException;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class PaymentStateMachine {
 
 

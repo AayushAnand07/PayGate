@@ -1,6 +1,7 @@
 package org.gateway.paygate.payment.statemachine;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.gateway.paygate.common.enums.PaymentActor;
 import org.gateway.paygate.common.enums.PaymentEvent;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PaymentTransitionService {
 
     private final PaymentTransitionLogRepository paymentTransitionLogRepository;
@@ -21,8 +23,7 @@ public class PaymentTransitionService {
 
     public PaymentStatus applyTransition(Payment payment, PaymentEvent event) {
        PaymentStatus next = paymentStateMachine.transition(payment.getStatus(), event);
-       payment.setStatus(next);
-        PaymentTransitionLog log = PaymentTransitionLog.builder()
+       PaymentTransitionLog log = PaymentTransitionLog.builder()
                 .payment(payment)
                 .fromStatus(payment.getStatus())
                 .event(event)
@@ -30,7 +31,7 @@ public class PaymentTransitionService {
                 .actor(PaymentActor.SYSTEM)
                 .occurredAt(LocalDateTime.now())
                 .build();
-
+        payment.setStatus(next);
         paymentTransitionLogRepository.save(log);
         return next;
     }
