@@ -40,10 +40,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse createOrder(UUID merchantId, CreateOrderRequest request) {
-        if(orderRepository.existsByMerchantIdAndReceipt(merchantId,request.reciept())){
-            throw new DuplicateResourceException("ORDER_RECIEPT_DUPLICATE","Order with the same reciept already exists for this merchant");
+        log.info("merchantId = {}", merchantId);
+        log.info("receipt from request = '{}'", request.receipt());
+
+        boolean exists = orderRepository.existsByMerchantIdAndReceipt(
+                merchantId,
+                request.receipt()
+        );
+
+        log.info("exists = {}", exists);
+
+        if (exists) {
+            throw new DuplicateResourceException(
+                    "ORDER_RECEIPT_DUPLICATE",
+                    "Order with the same receipt already exists for this merchant"
+            );
         }
-        OrderRecord order = OrderRecord.builder().receipt(request.reciept()).
+        OrderRecord order = OrderRecord.builder().receipt(request.receipt()).
                 amount(request.amount()).notes(request.notes()).
                 merchantId(merchantId).orderStatus(OrderStatus.CREATED).
                 expiresAt(request.expiresAt()!=null? request.expiresAt() : LocalDateTime.now().

@@ -1,9 +1,7 @@
 package org.gateway.paygate.payment.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.gateway.paygate.common.entity.BaseEntity;
 import org.gateway.paygate.common.entity.Money;
 import org.gateway.paygate.common.enums.PaymentMethod;
@@ -23,6 +21,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Payment extends BaseEntity {
 
     @Id
@@ -39,7 +39,7 @@ public class Payment extends BaseEntity {
     @Embedded
     private Money amount;
 
-    @Column(nullable = false,length = 100)
+    @Column(length = 100)
     private String idempotencyKey;
 
     @Enumerated(EnumType.STRING)

@@ -39,7 +39,8 @@ public class OrderRecord extends BaseEntity {
     @Column(length = 20, nullable = false)
     private OrderStatus orderStatus = OrderStatus.CREATED;
 
-    private Integer attempts;
+    @Builder.Default
+    private Integer attempts = 0;
 
     @Column(length = 100)
     private String receipt;

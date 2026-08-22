@@ -11,7 +11,7 @@ public record CreateOrderRequest(
         @NotNull(message = "Amount is required")
         Money amount,
         @Size(max = 100)
-        String reciept,
+        String receipt,
         Map<String, Object> notes,
         LocalDateTime expiresAt
 

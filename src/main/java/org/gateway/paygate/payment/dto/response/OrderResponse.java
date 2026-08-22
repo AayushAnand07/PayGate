@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public record OrderResponse(
-    UUID Id,
+    UUID id,
     UUID merchantId,
     String receipt, //Merchant Reference No.
     Money amount,
