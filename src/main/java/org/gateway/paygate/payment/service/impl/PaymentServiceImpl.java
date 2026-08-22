@@ -39,9 +39,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public PaymentResponse initiate(UUID merchantID, PaymentInitRequestDto request) {
+
         OrderRecord orderRecord = orderRepository.findByIdAndMerchantId(request.orderId(), merchantID).orElseThrow(
                 ()-> new ResourceNotFoundException("Order not found ",request.orderId())
         );
+        log.info("Order attempts from DB = {}", orderRecord.getAttempts());
         if(orderRecord.getOrderStatus()!= OrderStatus.CREATED && orderRecord.getOrderStatus()!= OrderStatus.ATTEMPTED){
             log.error("Order is not in a valid state for payment initiation. Order ID: {}, Current Status: {}", request.orderId(), orderRecord.getOrderStatus());
             throw new BusinessRuleViolationException("ORDER_NOT_PAYABLE","Order cannot accept pament in status: "+ orderRecord.getOrderStatus());
@@ -66,6 +68,7 @@ public class PaymentServiceImpl implements PaymentService {
                 request.paymentMethod(),
                 request.methodDetails()
         );
+        paymentTransitionService.applyTransition(payment,PaymentEvent.AUTHORIZE_ATTEMPT);
        PaymentResult result = paymentGatewayRouter.initiate(paymentRequest);
         if(result instanceof PaymentResult.Pending pending) {
             payment.setProcessorReference(pending.registerationReference());
@@ -103,5 +106,45 @@ public class PaymentServiceImpl implements PaymentService {
         }
         payment = paymentRepository.save(payment);
         return paymentMapper.toResponse(payment);
+    }
+
+    @Override
+    @Transactional
+    public void resolveAuthorization(UUID paymentId, boolean approve,
+                                     String bankReference, String simBankErrorCode, String simulatedTransactionError) {
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found ", paymentId));
+        if(payment.getStatus()!= PaymentStatus.AUTHORIZING){
+            log.warn("Payment {} is not in AUTHORIZING state. Current state: {}", paymentId, payment.getStatus());
+            return;
+        }
+        OrderRecord orderRecord = payment.getOrder();
+        if(approve){
+            paymentTransitionService.applyTransition(payment, PaymentEvent.AUTHORIZE_SUCCESS);
+            payment.setBankReference(bankReference);
+            payment.setAuthorizedAt(LocalDateTime.now());
+
+            paymentTransitionService.applyTransition(payment,PaymentEvent.CAPTURE_REQUEST);
+            PaymentResult captureResult = paymentGatewayRouter.capture(payment.getMethod(), paymentId);
+
+            if(captureResult instanceof PaymentResult.Success success){
+                paymentTransitionService.applyTransition(payment, PaymentEvent.CAPTURE_SUCCESS);
+                payment.setCapturedAt(LocalDateTime.now());
+                orderRecord.setOrderStatus(OrderStatus.PAID);
+            }
+            else{
+                paymentTransitionService.applyTransition(payment, PaymentEvent.CAPTURE_FAIL);
+                if(captureResult instanceof PaymentResult.Failure failure){
+                    payment.setErrorCode(failure.errorCode());
+                    payment.setErrorDescription(failure.errorDescription());
+                }
+            }
+        }
+        else {
+            paymentTransitionService.applyTransition(payment, PaymentEvent.AUTHORIZE_FAIL);
+            payment.setErrorCode(simBankErrorCode);
+            payment.setErrorDescription(simulatedTransactionError);
+        }
+        paymentRepository.save(payment);
+        orderRepository.save(orderRecord);
     }
 }
