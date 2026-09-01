@@ -16,7 +16,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
 vault:
-  master-key: ${VAULT_MASTER_KEY:}
+  master-key: ${VAULT_MASTER_KEY}
 
 payment:
   simulator:
