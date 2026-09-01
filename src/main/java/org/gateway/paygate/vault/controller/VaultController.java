@@ -3,6 +3,7 @@ package org.gateway.paygate.vault.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.gateway.paygate.merchant.security.MerchantContext;
 import org.gateway.paygate.vault.dto.request.TokenizeRequest;
 import org.gateway.paygate.vault.dto.response.TokenizeResponse;
 import org.gateway.paygate.vault.service.VaultService;
@@ -20,10 +21,10 @@ import java.util.UUID;
 @RequestMapping("/v1/vault")
 public class VaultController {
         private final VaultService vaultService;
-    UUID merchantId = UUID.fromString("3e40c301-bcef-4803-9f08-5998abe4365e"); //TODO: replace with merchant context
+        private final MerchantContext merchantContext;
+
     @PostMapping("/tokenize")
     public ResponseEntity<TokenizeResponse> tokenize(@Valid  @RequestBody TokenizeRequest request) {
-        // Implement the logic for tokenization here
-        return ResponseEntity.status(HttpStatus.CREATED).body(vaultService.tokenize(request,merchantId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(vaultService.tokenize(request,merchantContext.getMerchantId()));
     }
 }
