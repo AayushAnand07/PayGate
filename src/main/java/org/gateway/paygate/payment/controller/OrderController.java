@@ -1,6 +1,7 @@
 package org.gateway.paygate.payment.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.gateway.paygate.merchant.security.MerchantContext;
 import org.gateway.paygate.payment.dto.request.CreateOrderRequest;
 import org.gateway.paygate.payment.dto.response.OrderResponse;
 import org.gateway.paygate.payment.service.impl.OrderServiceImpl;
@@ -19,11 +20,11 @@ import java.util.UUID;
 public class OrderController {
 
     private final OrderServiceImpl orderService;
+    private final MerchantContext merchantContext;
 
     UUID merchantId = UUID.fromString("41d82ee8-0efb-462e-bdf5-b498ed4100d5"); //TODO: replace with merchant context
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
-        // Implementation for creating an order
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(merchantId,request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(merchantContext.getMerchantId(),request));
     }
 }
