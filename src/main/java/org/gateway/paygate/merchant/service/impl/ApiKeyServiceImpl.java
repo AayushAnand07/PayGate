@@ -14,6 +14,8 @@ import org.gateway.paygate.merchant.mapper.ApiKeyMapper;
 import org.gateway.paygate.merchant.repository.ApiKeyRepository;
 import org.gateway.paygate.merchant.repository.MerchantRepository;
 import org.gateway.paygate.merchant.service.ApiKeyService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,10 +31,11 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     private final MerchantRepository merchantRepository;
     private final ApiKeyRepository apiKeyRepository;
     private final ApiKeyMapper apiKeyMapper;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder() ;
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public ApiKeyCreateResponse create(UUID merchantId, createApiKeyRequest request) {
         Merchant merchant  = merchantRepository.findById(merchantId).orElseThrow(() -> new ResourceNotFoundException("Merchant", merchantId));
 
@@ -40,7 +43,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         String rawSecret = RandomizerUtil.randomBase64(40);
         ApiKey apiKey  =ApiKey.builder()
                 .keyId(keyId)
-                .keySecretHash(rawSecret)
+                .keySecretHash(bCryptPasswordEncoder.encode(rawSecret))
                 .merchant(merchant)
                 .environment(request.environment())
                 .build();
@@ -82,10 +85,10 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         if(!apiKey.isEnabled()) throw  new RuntimeException("Cannot rotate a disabled API key");
         String newRawSecret = RandomizerUtil.randomBase64(40);
         apiKey.setPreviousKeySecretHash(apiKey.getKeySecretHash());
-        apiKey.setKeySecretHash(newRawSecret);
+        apiKey.setKeySecretHash(bCryptPasswordEncoder.encode(newRawSecret));
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24));
-//        apiKey = apiKeyRepository.save(apiKey);
+       apiKey = apiKeyRepository.save(apiKey);
         return new ApiKeyCreateResponse(
                 apiKey.getId(),
                 apiKey.getKeyId(),
