@@ -62,7 +62,9 @@ public class VaultServiceImpl implements VaultService {
                 .expiryYear(String.valueOf(request.expiryYear()))
                 .cardHolderName(request.cardHolderName())
                 .build();
+        vaultCardRepository.save(vaultCard);
         String token = "tok_ "+ RandomizerUtil.randomBase64(32);
+
         cardTokenRepository.save(CardToken.builder().
                 token(token).
                 vaultCard(vaultCard).
@@ -70,7 +72,7 @@ public class VaultServiceImpl implements VaultService {
                 merchant(merchantId).
                 build());
 
-        vaultCardRepository.save(vaultCard);
+
         return new TokenizeResponse(token, lastFour,cardBrand, request.expiryMonth(), request.expiryYear());
     }
 
