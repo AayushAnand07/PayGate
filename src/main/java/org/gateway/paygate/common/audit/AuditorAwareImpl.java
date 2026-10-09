@@ -13,7 +13,7 @@ public class AuditorAwareImpl implements AuditorAware<String> {
 
     private final MerchantContext merchantContext;
     @Override
-    public java.util.Optional<String> getCurrentAuditor() {
+    public Optional<String> getCurrentAuditor() {
         try {
             String keyId = merchantContext.getKeyId();
             if (keyId != null && !keyId.isBlank()) {
