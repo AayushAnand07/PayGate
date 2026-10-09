@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gateway.paygate.common.exception.ResourceNotFoundException;
 import org.gateway.paygate.common.util.RandomizerUtil;
+import org.gateway.paygate.merchant.cache.ApiKeyCache;
 import org.gateway.paygate.merchant.dto.request.createApiKeyRequest;
 import org.gateway.paygate.merchant.dto.response.ApiKeyResponse;
 import org.gateway.paygate.merchant.dto.response.ApiKeyCreateResponse;
@@ -32,6 +33,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     private final ApiKeyRepository apiKeyRepository;
     private final ApiKeyMapper apiKeyMapper;
     private final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder() ;
+    private final ApiKeyCache apiKeyCache;
 
 
     @Override
@@ -72,6 +74,7 @@ public class ApiKeyServiceImpl implements ApiKeyService {
     public void revoke(UUID merchantId, UUID keyId) {
         ApiKey key = apiKeyRepository.findById(keyId).filter(apiKey -> apiKey.getMerchant().getId().equals(merchantId)).orElseThrow(() -> new ResourceNotFoundException("API Key", keyId));
         key.setEnabled(false);
+        apiKeyCache.evict(key.getKeyId());
 
     }
 
@@ -89,6 +92,8 @@ public class ApiKeyServiceImpl implements ApiKeyService {
         apiKey.setRotatedAt(LocalDateTime.now());
         apiKey.setGracePeriodExpiresAt(LocalDateTime.now().plusHours(24));
        apiKey = apiKeyRepository.save(apiKey);
+
+       apiKeyCache.evict(apiKey.getKeyId());
         return new ApiKeyCreateResponse(
                 apiKey.getId(),
                 apiKey.getKeyId(),
