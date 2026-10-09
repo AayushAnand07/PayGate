@@ -1,6 +1,7 @@
 package org.gateway.paygate.merchant.security;
 
 import lombok.RequiredArgsConstructor;
+import org.gateway.paygate.common.Idempotency.IdempotencyFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -31,6 +32,7 @@ public class WebSecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final ApiKeyAuthenticationFilter apiKeyAuthenticationFilter;
+    private final IdempotencyFilter idempotencyFilter;
 
 
     @Bean
@@ -42,18 +44,20 @@ public class WebSecurityConfig {
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth.requestMatchers("/v1/auth/signup","/v1/auth/login").permitAll().anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(idempotencyFilter,JwtAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
     @Order(2)
     public SecurityFilterChain apiKeyChain(HttpSecurity http){
-        return http
-                .securityMatcher(API_KEY_ROUTES)
+        return http.securityMatcher(API_KEY_ROUTES)
                 .csrf(csrf-> csrf.disable())
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth->auth.anyRequest().authenticated())
                 .addFilterBefore(apiKeyAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(idempotencyFilter, ApiKeyAuthenticationFilter.class)
+
                 .build();
     }
 
