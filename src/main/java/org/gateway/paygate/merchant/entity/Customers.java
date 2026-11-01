@@ -1,17 +1,24 @@
 package org.gateway.paygate.merchant.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.gateway.paygate.common.entity.BaseEntity;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Getter
+@Setter
+@Builder
 @Entity
 @Table(name = "customers" , indexes = {
         @Index(name = "idx_customers_merchant_id", columnList = "merchant_id"),
         @Index(name = "idx_customers_email", columnList = "email"),
 
 })
+
 public class Customers extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
