@@ -38,7 +38,7 @@ public class VaultServiceImpl implements VaultService {
     private final CardTokenRepository cardTokenRepository;
     private final VaultCardRepository vaultCardRepository;
     private final BytesEncryptor dekEncryptor;
-    private PaymentProcessorRouter paymentProcessorRouter;
+    private final PaymentProcessorRouter paymentProcessorRouter;
 
     @Override
     @Transactional
@@ -77,6 +77,7 @@ public class VaultServiceImpl implements VaultService {
     }
 
     @Override
+    @Transactional
     public PaymentProcessorResponse charge(UUID paymentId,String token, Money amount, Map<String, Object> methodDetails) {
         CardToken cardToken = cardTokenRepository.findByTokenAndRevokedAtIsNull(token).orElseThrow(() -> new ResourceNotFoundException("Card Token",token));
         VaultCard vaultCard = cardToken.getVaultCard();
