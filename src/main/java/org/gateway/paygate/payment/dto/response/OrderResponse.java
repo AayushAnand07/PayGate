@@ -10,6 +10,7 @@ import java.util.UUID;
 public record OrderResponse(
     UUID id,
     UUID merchantId,
+    UUID customerId,
     String receipt, //Merchant Reference No.
     Money amount,
     OrderStatus status,

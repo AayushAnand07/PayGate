@@ -6,6 +6,7 @@ import org.gateway.paygate.common.enums.OrderStatus;
 import org.gateway.paygate.common.exception.BusinessRuleViolationException;
 import org.gateway.paygate.common.exception.DuplicateResourceException;
 import org.gateway.paygate.common.exception.ResourceNotFoundException;
+import org.gateway.paygate.merchant.service.CustomerService;
 import org.gateway.paygate.payment.dto.request.CreateOrderRequest;
 import org.gateway.paygate.payment.dto.response.OrderResponse;
 import org.gateway.paygate.payment.dto.response.PaymentResponse;
@@ -33,6 +34,8 @@ public class OrderServiceImpl implements OrderService {
     private final PaymentRepository paymentRepository;
     private final PaymentMapper paymentMapper;
     private final OrderMapper orderMapper;
+    private final CustomerService customerservice;
+
 
     @Value("${payment.order.default-order-expiry-minutes:30}")
     private int defaultOrderExpiryMinutes;
@@ -56,9 +59,19 @@ public class OrderServiceImpl implements OrderService {
                     "Order with the same receipt already exists for this merchant"
             );
         }
+
+        UUID customerId = null;
+        if(request.customer()!=null){
+            customerId = customerservice.findOrCreate(
+                    merchantId,
+                    request.customer().email(),
+                    request.customer().name(),
+                    request.customer().phone());
+        }
+
         OrderRecord order = OrderRecord.builder().receipt(request.receipt()).
                 amount(request.amount()).notes(request.notes()).
-                merchantId(merchantId).orderStatus(OrderStatus.CREATED).
+                merchantId(merchantId).customerId(customerId).orderStatus(OrderStatus.CREATED).
                 expiresAt(request.expiresAt()!=null? request.expiresAt() : LocalDateTime.now().
                         plusMinutes(defaultOrderExpiryMinutes)).build();
         order = orderRepository.save(order);
