@@ -1,6 +1,7 @@
 package org.gateway.paygate.payment.service.impl;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gateway.paygate.common.enums.OrderStatus;
@@ -40,7 +41,13 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponse initiate(UUID merchantID, PaymentInitRequestDto request) {
 
-        OrderRecord orderRecord = orderRepository.findByIdAndMerchantId(request.orderId(), merchantID).orElseThrow(
+//        OrderRecord orderRecord = orderRepository.findByIdAndMerchantId(request.orderId(), merchantID).orElseThrow(
+//                ()-> new ResourceNotFoundException("Order not found ",request.orderId())
+//        );
+
+        //Adding Pessimistic Lock to avoid race condition when multiple payment initiation requests are made for the same order
+
+        OrderRecord orderRecord = orderRepository.findByIdAndMerchantIdForUpdate(request.orderId(), merchantID).orElseThrow(
                 ()-> new ResourceNotFoundException("Order not found ",request.orderId())
         );
         log.info("Order attempts from DB = {}", orderRecord.getAttempts());
@@ -87,8 +94,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional()
     public PaymentResponse capture(UUID merchantId, UUID paymentId) {
-        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId, merchantId).orElseThrow(
+//        Payment payment = paymentRepository.findByIdAndMerchantId(paymentId, merchantId).orElseThrow(
+//                () -> new ResourceNotFoundException("Payment not found ", paymentId)
+//        );
+
+        Payment payment = paymentRepository.findByIdAndMerchantIdForUpdate(paymentId, merchantId).orElseThrow(
                 () -> new ResourceNotFoundException("Payment not found ", paymentId)
         );
 
@@ -112,7 +124,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public void resolveAuthorization(UUID paymentId, boolean approve,
                                      String bankReference, String simBankErrorCode, String simulatedTransactionError) {
-        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found ", paymentId));
+        //Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found ", paymentId));
+        Payment payment = paymentRepository.findByIdForUpdate(paymentId).orElseThrow(() -> new ResourceNotFoundException("Payment not found ", paymentId));
         if(payment.getStatus()!= PaymentStatus.AUTHORIZING){
             log.warn("Payment {} is not in AUTHORIZING state. Current state: {}", paymentId, payment.getStatus());
             return;
